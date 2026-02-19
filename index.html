@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grievance Submission</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: #fdf3a7;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier Prime', monospace;
+    padding: 40px 20px 40px 80px;
+    position: relative;
+    background-image:
+      linear-gradient(to right, transparent 68px, #e8474a 68px, #e8474a 71px, transparent 71px),
+      repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 27px,
+        #9ec4e8 27px,
+        #9ec4e8 29px
+      );
+  }
+
+  .form-wrapper { width: 100%; max-width: 560px; }
+
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    text-align: center; margin-bottom: 6px; color: #000;
+  }
+
+  .form-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px; font-weight: 900;
+    text-align: center; line-height: 1.05;
+    margin-bottom: 32px; color: #000; letter-spacing: -0.01em;
+  }
+
+  .form-body {
+    background: #fff;
+    border-radius: 100px;
+    border: 6px solid #000;
+    outline: 6px solid #000;
+    outline-offset: 5px;
+    padding: 44px 52px 44px;
+    position: relative;
+  }
+
+  .field-group {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px; margin-bottom: 18px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; color: #000;
+  }
+
+  input[type="text"], input[type="tel"], input[type="email"] {
+    background: #fff; border: none;
+    border-bottom: 2px solid #000;
+    padding: 8px 0 6px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 15px; color: #000; outline: none;
+    width: 100%; transition: border-color 0.2s;
+  }
+
+  input:focus { border-bottom-color: #555; }
+  input.error { border-bottom-color: #c00; }
+
+  .error-msg {
+    font-size: 10px; color: #c00;
+    letter-spacing: 0.05em; min-height: 14px; display: block;
+  }
+
+  .upload-area {
+    border: 2px dashed #000; padding: 22px;
+    text-align: center; cursor: pointer;
+    border-radius: 8px; transition: background 0.2s;
+    position: relative; margin-top: 4px;
+  }
+
+  .upload-area:hover { background: #f5f5f5; }
+
+  .upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0;
+    cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .upload-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+
+  .upload-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase;
+  }
+
+  .upload-sub { font-size: 10px; color: #666; margin-top: 3px; letter-spacing: 0.05em; }
+
+  .file-name {
+    font-size: 11px; color: #000;
+    margin-top: 6px; font-weight: 700; word-break: break-all;
+  }
+
+  .divider { border: none; border-top: 1px solid #ccc; margin: 28px 0; }
+
+  .submit-btn {
+    width: 100%; background: #000; color: #fff; border: none;
+    padding: 16px 24px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    cursor: pointer; border-radius: 60px;
+    transition: background 0.2s, transform 0.1s;
+    min-height: 52px;
+  }
+
+  .submit-btn:hover:not(:disabled) { background: #333; }
+  .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+  .submit-btn:disabled { cursor: not-allowed; opacity: 0.85; }
+  .submit-btn.submitting { letter-spacing: 0.08em; font-size: 12px; }
+
+  .stamp {
+    text-align: center; margin-top: 22px;
+    font-size: 9px; letter-spacing: 0.25em;
+    color: #aaa; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="form-wrapper">
+  <div class="form-body">
+    <p class="form-title">LAAPOA</p>
+    <h1 class="form-headline">Grievance<br>Submission</h1>
+    <hr class="divider" style="margin-bottom: 28px;">
+
+    <form id="grievanceForm" novalidate>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Doe">
+          <span class="error-msg" id="lastNameErr"></span>
+        </div>
+        <div class="field">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="John">
+          <span class="error-msg" id="firstNameErr"></span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="(310) 555-0100">
+          <span class="error-msg" id="phoneErr"></span>
+        </div>
+        <div class="field">
+          <label for="email">Personal Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="john@email.com">
+          <span class="error-msg" id="emailErr"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Supporting Document</label>
+        <div class="upload-area" id="uploadArea">
+          <input type="file" id="fileUpload" name="fileUpload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+          <span class="upload-icon">📎</span>
+          <span class="upload-label">Click to Upload File</span>
+          <p class="upload-sub">PDF, Word, or Image — max 10 MB</p>
+          <p class="file-name" id="fileName"></p>
+        </div>
+        <span class="error-msg" id="fileErr"></span>
+      </div>
+
+      <hr class="divider">
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        Submit Grievance
+      </button>
+
+    </form>
+  </div>
+
+  <p class="stamp">All submissions are confidential &bull; LAAPOA &copy; 2026</p>
+</div>
+
+<script>
+  // ─── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ───────────────────────
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7Sl4y_vvIRM5LhaOuKTwBHe7QtMcuoQvwDa09ky2erqeJ31IynA4VnLY89eufs9VdXg/exec';
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const form       = document.getElementById('grievanceForm');
+  const submitBtn  = document.getElementById('submitBtn');
+  const fileInput  = document.getElementById('fileUpload');
+  const fileNameEl = document.getElementById('fileName');
+
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files[0];
+    fileNameEl.textContent = f ? `✔ ${f.name}` : '';
+  });
+
+  function setError(inputId, errId, msg) {
+    const el  = document.getElementById(inputId);
+    const err = document.getElementById(errId);
+    if (msg) { el.classList.add('error');    err.textContent = msg; }
+    else      { el.classList.remove('error'); err.textContent = '';  }
+    return !!msg;
+  }
+
+  function validate() {
+    let hasErr  = false;
+    const lastName  = document.getElementById('lastName').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const phone     = document.getElementById('phone').value.trim();
+    const email     = document.getElementById('email').value.trim();
+
+    hasErr = setError('lastName',  'lastNameErr',  lastName  ? '' : 'Last name is required.')  || hasErr;
+    hasErr = setError('firstName', 'firstNameErr', firstName ? '' : 'First name is required.') || hasErr;
+
+    const phoneClean = phone.replace(/\D/g, '');
+    hasErr = setError('phone', 'phoneErr',
+      !phone                 ? 'Phone number is required.'   :
+      phoneClean.length < 10 ? 'Enter a valid phone number.' : ''
+    ) || hasErr;
+
+    let emailErr = '';
+    if (!email)                                          emailErr = 'Email is required.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) emailErr = 'Enter a valid email address.';
+    else if (email.toLowerCase().endsWith('@lawa.org'))  emailErr = '@lawa.org addresses are not permitted.';
+    hasErr = setError('email', 'emailErr', emailErr) || hasErr;
+
+    return !hasErr;
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const lastName  = document.getElementById('lastName').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const phone     = document.getElementById('phone').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const file      = fileInput.files[0] || null;
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('submitting');
+    submitBtn.textContent = `Your snitch info is being sent ${firstName}.`;
+
+    try {
+      const payload = {
+        lastName, firstName, phone, email,
+        fileName: '', fileData: '', fileMime: ''
+      };
+
+      if (file) {
+        payload.fileName = file.name;
+        payload.fileMime = file.type || 'application/octet-stream';
+        payload.fileData = await fileToBase64(file);
+      }
+
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body:   JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.result === 'success') {
+        submitBtn.textContent      = '✔ Submitted — Check your email for confirmation.';
+        submitBtn.style.background = '#1a6e2e';
+        form.reset();
+        fileNameEl.textContent = '';
+      } else {
+        throw new Error(result.message || 'Unknown error');
+      }
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('submitting');
+      submitBtn.textContent      = 'Submission Failed — Please Try Again';
+      submitBtn.style.background = '#c00';
+      setTimeout(() => {
+        submitBtn.style.background = '#000';
+        submitBtn.textContent      = 'Submit Grievance';
+      }, 4000);
+    }
+  });
+</script>
+</body>
+</html>
