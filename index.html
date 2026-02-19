@@ -67,6 +67,13 @@
     letter-spacing: 0.2em; text-transform: uppercase; color: #000;
   }
 
+  label .req {
+    color: #c00;
+    margin-left: 2px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
   input[type="text"], input[type="tel"], input[type="email"] {
     background: #fff; border: none;
     border-bottom: 2px solid #000;
@@ -268,12 +275,12 @@
 
       <div class="field-group">
         <div class="field">
-          <label for="lastName">Last Name</label>
+          <label for="lastName">Last Name <span class="req">*</span></label>
           <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Doe">
           <span class="error-msg" id="lastNameErr"></span>
         </div>
         <div class="field">
-          <label for="firstName">First Name</label>
+          <label for="firstName">First Name <span class="req">*</span></label>
           <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="John">
           <span class="error-msg" id="firstNameErr"></span>
         </div>
@@ -281,19 +288,19 @@
 
       <div class="field-group">
         <div class="field">
-          <label for="phone">Phone Number</label>
+          <label for="phone">Phone Number <span class="req">*</span></label>
           <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="(310) 555-0100">
           <span class="error-msg" id="phoneErr"></span>
         </div>
         <div class="field">
-          <label for="email">Personal Email</label>
+          <label for="email">Personal Email <span class="req">*</span></label>
           <input type="email" id="email" name="email" autocomplete="email" placeholder="john@email.com">
           <span class="error-msg" id="emailErr"></span>
         </div>
       </div>
 
       <div class="field">
-        <label>Supporting Documents</label>
+        <label>Supporting Documents <span class="req">*</span></label>
         <div class="upload-area" id="uploadArea">
           <input type="file" id="fileUpload" name="fileUpload"
                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
@@ -407,6 +414,15 @@
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) emailErr = 'Enter a valid email address.';
     else if (email.toLowerCase().endsWith('@lawa.org'))  emailErr = '@lawa.org addresses are not permitted.';
     hasErr = setError('email', 'emailErr', emailErr) || hasErr;
+
+    // File upload required
+    const fileErr = document.getElementById('fileErr');
+    if (selectedFiles.length === 0) {
+      fileErr.textContent = 'At least one file is required.';
+      hasErr = true;
+    } else {
+      fileErr.textContent = '';
+    }
 
     return !hasErr;
   }
