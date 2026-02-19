@@ -15,8 +15,9 @@
     align-items: center;
     justify-content: center;
     font-family: 'Courier Prime', monospace;
-    padding: 40px 20px 40px 80px;
+    padding: 40px 20px;
     position: relative;
+    background-attachment: fixed;
     background-image:
       linear-gradient(to right, transparent 68px, #e8474a 68px, #e8474a 71px, transparent 71px),
       repeating-linear-gradient(
@@ -28,7 +29,7 @@
       );
   }
 
-  .form-wrapper { width: 100%; max-width: 560px; }
+  .form-wrapper { width: 100%; max-width: 560px; margin: 0 auto; }
 
   .form-title {
     font-family: 'Playfair Display', serif;
@@ -83,6 +84,7 @@
     letter-spacing: 0.05em; min-height: 14px; display: block;
   }
 
+  /* Upload area */
   .upload-area {
     border: 2px dashed #000; padding: 22px;
     text-align: center; cursor: pointer;
@@ -106,9 +108,52 @@
 
   .upload-sub { font-size: 10px; color: #666; margin-top: 3px; letter-spacing: 0.05em; }
 
-  .file-name {
-    font-size: 11px; color: #000;
-    margin-top: 6px; font-weight: 700; word-break: break-all;
+  /* File list */
+  .file-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .file-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: 'Courier Prime', monospace;
+  }
+
+  .file-list-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 85%;
+  }
+
+  .file-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #c00;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .file-remove:hover { color: #900; }
+
+  .file-count {
+    font-size: 10px;
+    color: #555;
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+    text-align: center;
   }
 
   .divider { border: none; border-top: 1px solid #ccc; margin: 28px 0; }
@@ -127,7 +172,52 @@
   .submit-btn:hover:not(:disabled) { background: #333; }
   .submit-btn:active:not(:disabled) { transform: scale(0.98); }
   .submit-btn:disabled { cursor: not-allowed; opacity: 0.85; }
-  .submit-btn.submitting { letter-spacing: 0.08em; font-size: 12px; }
+  .submit-btn.submitting { letter-spacing: 0.08em; font-size: 11px; }
+
+  /* Progress bar */
+  .progress-wrap {
+    display: none;
+    margin-top: 14px;
+  }
+  .progress-wrap.visible { display: block; }
+  .progress-bar-bg {
+    background: #eee;
+    border-radius: 20px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #000;
+    border-radius: 20px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .progress-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-top: 5px;
+    color: #555;
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 24px 16px;
+      background-attachment: scroll;
+    }
+    .form-body {
+      border-radius: 40px;
+      padding: 32px 24px 32px;
+      outline-offset: 4px;
+    }
+    .form-headline {
+      font-size: 28px;
+    }
+    .field-group {
+      grid-template-columns: 1fr;
+    }
+  }
 
   .stamp {
     text-align: center; margin-top: 22px;
@@ -173,14 +263,17 @@
       </div>
 
       <div class="field">
-        <label>Supporting Document</label>
+        <label>Supporting Documents</label>
         <div class="upload-area" id="uploadArea">
-          <input type="file" id="fileUpload" name="fileUpload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+          <input type="file" id="fileUpload" name="fileUpload"
+                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                 multiple>
           <span class="upload-icon">📎</span>
-          <span class="upload-label">Click to Upload File</span>
-          <p class="upload-sub">PDF, Word, or Image — max 10 MB</p>
-          <p class="file-name" id="fileName"></p>
+          <span class="upload-label">Click to Upload Files</span>
+          <p class="upload-sub">PDF, Word, or Image — multiple files allowed — max 10 MB each</p>
         </div>
+        <div class="file-list" id="fileList"></div>
+        <p class="file-count" id="fileCount"></p>
         <span class="error-msg" id="fileErr"></span>
       </div>
 
@@ -190,6 +283,13 @@
         Submit Grievance
       </button>
 
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-label" id="progressLabel"></p>
+      </div>
+
     </form>
   </div>
 
@@ -197,25 +297,62 @@
 </div>
 
 <script>
-  // ─── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ───────────────────────
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7Sl4y_vvIRM5LhaOuKTwBHe7QtMcuoQvwDa09ky2erqeJ31IynA4VnLY89eufs9VdXg/exec';
-  // ──────────────────────────────────────────────────────────────────────────
 
-  const form       = document.getElementById('grievanceForm');
-  const submitBtn  = document.getElementById('submitBtn');
-  const fileInput  = document.getElementById('fileUpload');
-  const fileNameEl = document.getElementById('fileName');
+  const form         = document.getElementById('grievanceForm');
+  const submitBtn    = document.getElementById('submitBtn');
+  const fileInput    = document.getElementById('fileUpload');
+  const fileListEl   = document.getElementById('fileList');
+  const fileCountEl  = document.getElementById('fileCount');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel= document.getElementById('progressLabel');
+
+  // Track selected files in an array (allows removal)
+  let selectedFiles = [];
 
   fileInput.addEventListener('change', () => {
-    const f = fileInput.files[0];
-    fileNameEl.textContent = f ? `✔ ${f.name}` : '';
+    // Merge new files into selectedFiles, skip duplicates by name
+    Array.from(fileInput.files).forEach(f => {
+      if (!selectedFiles.find(x => x.name === f.name && x.size === f.size)) {
+        selectedFiles.push(f);
+      }
+    });
+    // Reset input so same file can be re-added after removal
+    fileInput.value = '';
+    renderFileList();
   });
+
+  function renderFileList() {
+    fileListEl.innerHTML = '';
+    selectedFiles.forEach((f, i) => {
+      const item = document.createElement('div');
+      item.className = 'file-list-item';
+      item.innerHTML = `
+        <span>📄 ${f.name} <em style="color:#888">(${(f.size/1024).toFixed(0)} KB)</em></span>
+        <button type="button" class="file-remove" data-index="${i}" title="Remove">✕</button>
+      `;
+      fileListEl.appendChild(item);
+    });
+
+    // Remove buttons
+    fileListEl.querySelectorAll('.file-remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedFiles.splice(parseInt(btn.dataset.index), 1);
+        renderFileList();
+      });
+    });
+
+    fileCountEl.textContent = selectedFiles.length > 0
+      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} selected`
+      : '';
+  }
 
   function setError(inputId, errId, msg) {
     const el  = document.getElementById(inputId);
     const err = document.getElementById(errId);
-    if (msg) { el.classList.add('error');    err.textContent = msg; }
-    else      { el.classList.remove('error'); err.textContent = '';  }
+    if (msg) { el && el.classList.add('error');    err.textContent = msg; }
+    else      { el && el.classList.remove('error'); err.textContent = '';  }
     return !!msg;
   }
 
@@ -253,6 +390,12 @@
     });
   }
 
+  function setProgress(pct, label) {
+    progressWrap.classList.add('visible');
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = label;
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -261,42 +404,57 @@
     const firstName = document.getElementById('firstName').value.trim();
     const phone     = document.getElementById('phone').value.trim();
     const email     = document.getElementById('email').value.trim();
-    const file      = fileInput.files[0] || null;
 
     submitBtn.disabled = true;
     submitBtn.classList.add('submitting');
     submitBtn.textContent = `Your snitch info is being sent ${firstName}.`;
 
     try {
-      const payload = {
-        lastName, firstName, phone, email,
-        fileName: '', fileData: '', fileMime: ''
-      };
+      // Build files array with base64 data
+      const files = [];
+      const total = selectedFiles.length;
 
-      if (file) {
-        payload.fileName = file.name;
-        payload.fileMime = file.type || 'application/octet-stream';
-        payload.fileData = await fileToBase64(file);
+      for (let i = 0; i < total; i++) {
+        const f = selectedFiles[i];
+        setProgress(
+          Math.round(((i) / Math.max(total, 1)) * 70),
+          `Preparing file ${i + 1} of ${total}...`
+        );
+        const b64 = await fileToBase64(f);
+        files.push({
+          fileName: f.name,
+          fileMime: f.type || 'application/octet-stream',
+          fileData: b64
+        });
       }
+
+      setProgress(75, 'Sending to server...');
+
+      const payload = { lastName, firstName, phone, email, files };
 
       const response = await fetch(SCRIPT_URL, {
         method: 'POST',
         body:   JSON.stringify(payload)
       });
 
+      setProgress(95, 'Finalizing...');
+
       const result = await response.json();
 
       if (result.result === 'success') {
+        setProgress(100, 'Done!');
         submitBtn.textContent      = '✔ Submitted — Check your email for confirmation.';
         submitBtn.style.background = '#1a6e2e';
         form.reset();
-        fileNameEl.textContent = '';
+        selectedFiles = [];
+        renderFileList();
       } else {
         throw new Error(result.message || 'Unknown error');
       }
 
     } catch (err) {
       console.error(err);
+      progressWrap.classList.remove('visible');
       submitBtn.disabled = false;
       submitBtn.classList.remove('submitting');
       submitBtn.textContent      = 'Submission Failed — Please Try Again';
