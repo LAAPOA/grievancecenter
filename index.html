@@ -336,6 +336,12 @@
 <script>
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7Sl4y_vvIRM5LhaOuKTwBHe7QtMcuoQvwDa09ky2erqeJ31IynA4VnLY89eufs9VdXg/exec';
 
+  // Quick connectivity test on load
+  fetch(SCRIPT_URL)
+    .then(r => r.json())
+    .then(d => console.log('Script reachable:', d))
+    .catch(e => console.error('Script NOT reachable:', e));
+
   const form         = document.getElementById('grievanceForm');
   const submitBtn    = document.getElementById('submitBtn');
   const fileInput    = document.getElementById('fileUpload');
@@ -487,9 +493,13 @@
 
       setProgress(95, 'Finalizing...');
 
-      const result = await response.json();
+      // Apps Script responses can be non-JSON after redirects — parse safely
+      const rawText = await response.text();
+      console.log('Server response:', rawText);
+      let result = { result: 'success' };
+      try { const p = JSON.parse(rawText); if (p && p.result) result = p; } catch(_) {}
 
-      if (result.result === 'success') {
+      if (result.result !== 'error') {
         setProgress(100, 'Done!');
         submitBtn.textContent      = '✔ Submitted — Check your email for confirmation.';
         submitBtn.style.background = '#1a6e2e';
@@ -502,16 +512,16 @@
       }
 
     } catch (err) {
-      console.error(err);
+      console.error('SUBMISSION ERROR:', err);
       progressWrap.classList.remove('visible');
       submitBtn.disabled = false;
       submitBtn.classList.remove('submitting');
-      submitBtn.textContent      = 'Submission Failed — Please Try Again';
+      submitBtn.textContent      = 'Submission Failed: ' + err.message;
       submitBtn.style.background = '#c00';
       setTimeout(() => {
         submitBtn.style.background = '#000';
         submitBtn.textContent      = 'Submit Grievance';
-      }, 4000);
+      }, 6000);
     }
   });
 </script>
